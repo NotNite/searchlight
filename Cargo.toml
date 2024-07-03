@@ -1,0 +1,15 @@
+[package]
+name = "searchlight"
+version = "0.1.0"
+description = "Binary Ninja signature maker"
+authors = ["NotNite <hi@notnite.com>"]
+license = "MIT"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+anyhow = "1.0.86"
+binaryninja = { git = "https://github.com/Vector35/binaryninja-api.git", branch = "dev" }
+log = "0.4.22"
