@@ -14,6 +14,7 @@ mod sig;
 
 pub const MAX_LEN: usize = 128;
 pub const MAX_SIGS_AT_ONCE: usize = 10;
+pub const MAX_INSN_SIZE: usize = 16;
 
 struct FunctionSigMakerCommand;
 
@@ -118,7 +119,7 @@ impl Command for SigScannerCommand {
         let binary = sig::binary(&bv);
         let task = BackgroundTask::new("Scanning for signature...", false).unwrap();
         log::info!("========== Scan results for {}", sig);
-        sig::scan_in_binary(&binary, &bv, &sig, true);
+        sig::scan_in_binary(&binary, &bv, &sig, true, MAX_SIGS_AT_ONCE);
         log::info!("==========");
         task.finish();
     }
