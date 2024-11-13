@@ -25,7 +25,11 @@ impl Display for Signature {
 }
 
 pub fn parse(sig: &str) -> anyhow::Result<Signature> {
-    let sig = sig.trim().split(" ");
+    let sig = sig
+        .trim()
+        .trim_start_matches("[searchlight]")
+        .trim()
+        .split(" ");
     let mut sig_bytes = Vec::new();
     for byte in sig {
         if byte == "??".to_string() {

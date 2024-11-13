@@ -7,7 +7,7 @@ use binaryninja::{
     },
     function::Function,
     interaction::get_text_line_input,
-    logger,
+    logger::Logger,
 };
 
 mod sig;
@@ -132,7 +132,7 @@ impl Command for SigScannerCommand {
 #[no_mangle]
 #[allow(non_snake_case)]
 pub extern "C" fn CorePluginInit() -> bool {
-    logger::init(log::LevelFilter::max()).expect("Unable to initialize logger");
+    Logger::new("searchlight").init();
 
     register_for_function(
         "searchlight\\Create signature for function",
