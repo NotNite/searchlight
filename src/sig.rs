@@ -27,12 +27,17 @@ impl Display for Signature {
 pub fn parse(sig: &str) -> anyhow::Result<Signature> {
     let sig = sig
         .trim()
+        // Remove the log prefix if it's being copied from there
         .trim_start_matches("[searchlight]")
-        .trim()
-        .split(" ");
+        // Remove non-hex characters (like punctuation)
+        .chars()
+        .filter(|c| c.is_ascii_hexdigit() || c.is_whitespace() || c == &'?')
+        .collect::<String>();
+    // Split spaces into each byte
+    let sig = sig.trim().split(" ");
     let mut sig_bytes = Vec::new();
     for byte in sig {
-        if byte == "??".to_string() {
+        if byte == "?".to_string() || byte == "??".to_string() {
             sig_bytes.push(None);
         } else {
             sig_bytes.push(Some(u8::from_str_radix(byte, 16)?));
