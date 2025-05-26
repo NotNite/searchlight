@@ -1,7 +1,7 @@
 use crate::MAX_INSN_SIZE;
 use binaryninja::{
     architecture::Architecture,
-    binaryview::{BinaryView, BinaryViewBase, BinaryViewExt},
+    binary_view::{BinaryView, BinaryViewBase, BinaryViewExt},
 };
 use iced_x86::{FlowControl, OpKind};
 use std::fmt::Display;
@@ -288,12 +288,11 @@ pub fn get_function_tries(bv: &BinaryView, func: &binaryninja::function::Functio
     }
 
     // try all call indirections (call <func>)
-    let refs = bv.get_code_refs(start);
+    let refs = bv.code_refs_from_addr(start, None);
     for ref_ in refs.iter() {
-        let ref_ = ref_.address;
-        let ref_byte = read_u8(bv, ref_);
+        let ref_byte = read_u8(bv, *ref_);
         if ref_byte == 0xE8 || ref_byte == 0xE9 {
-            tries.push(ref_);
+            tries.push(*ref_);
         }
     }
 
@@ -301,6 +300,6 @@ pub fn get_function_tries(bv: &BinaryView, func: &binaryninja::function::Functio
 }
 
 pub fn get_address_tries(bv: &BinaryView, addr: u64) -> Vec<u64> {
-    let refs = bv.get_code_refs(addr);
-    refs.iter().map(|ref_| ref_.address).collect()
+    let refs = bv.code_refs_from_addr(addr, None);
+    refs.iter().map(|ref_| *ref_).collect()
 }
