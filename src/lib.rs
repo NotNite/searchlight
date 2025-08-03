@@ -1,9 +1,9 @@
 use binaryninja::{
-    backgroundtask::BackgroundTask,
-    binaryview::{BinaryView, BinaryViewBase, BinaryViewExt},
+    background_task::BackgroundTask,
+    binary_view::{BinaryView, BinaryViewBase, BinaryViewExt},
     command::{
-        register, register_for_address, register_for_function, register_for_range, AddressCommand,
-        Command, FunctionCommand, RangeCommand,
+        register_command, register_command_for_address, register_command_for_function,
+        register_command_for_range, AddressCommand, Command, FunctionCommand, RangeCommand,
     },
     function::Function,
     interaction::get_text_line_input,
@@ -25,7 +25,7 @@ impl FunctionCommand for FunctionSigMakerCommand {
         let bv = view.to_owned();
         let start = func.start();
         std::thread::spawn(move || {
-            let task = BackgroundTask::new("Creating signature...", false).unwrap();
+            let task = BackgroundTask::new("Creating signature...", false);
             log::info!("========== Signatures for function 0x{:x}", start);
             let mut done = 0;
 
@@ -58,7 +58,7 @@ impl AddressCommand for AddressSigMakerCommand {
         let binary = sig::binary(bv);
         let bv = bv.to_owned();
         std::thread::spawn(move || {
-            let task = BackgroundTask::new("Creating signature...", false).unwrap();
+            let task = BackgroundTask::new("Creating signature...", false);
             log::info!("========== Signatures for address 0x{:x}", addr);
             let mut done = 0;
 
@@ -79,7 +79,7 @@ impl AddressCommand for AddressSigMakerCommand {
     }
 
     fn valid(&self, view: &BinaryView, addr: u64) -> bool {
-        !view.get_code_refs(addr).is_empty()
+        !view.code_refs_to_addr(addr).is_empty()
     }
 }
 
@@ -117,7 +117,7 @@ impl Command for SigScannerCommand {
 
         let bv = view.to_owned();
         let binary = sig::binary(&bv);
-        let task = BackgroundTask::new("Scanning for signature...", false).unwrap();
+        let task = BackgroundTask::new("Scanning for signature...", false);
         log::info!("========== Scan results for {}", sig);
         sig::scan_in_binary(&binary, &bv, &sig, true, MAX_SIGS_AT_ONCE);
         log::info!("==========");
@@ -134,25 +134,25 @@ impl Command for SigScannerCommand {
 pub extern "C" fn CorePluginInit() -> bool {
     Logger::new("searchlight").init();
 
-    register_for_function(
+    register_command_for_function(
         "searchlight\\Create signature for function",
         "Create signature for a given function",
         FunctionSigMakerCommand,
     );
 
-    register_for_address(
+    register_command_for_address(
         "searchlight\\Create signature for address",
         "Create signature for a static address",
         AddressSigMakerCommand,
     );
 
-    register_for_range(
+    register_command_for_range(
         "searchlight\\Create signature for range",
         "Create signature for a given range",
         RangeSigMakerCommand,
     );
 
-    register(
+    register_command(
         "searchlight\\Scan for signature",
         "Scan for signatures in the binary",
         SigScannerCommand,
